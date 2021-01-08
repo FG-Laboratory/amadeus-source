@@ -1,0 +1,5 @@
+APIkeys.py
+__pycache__/
+Trash/
+data/localdials/
+data/messages_train.txt

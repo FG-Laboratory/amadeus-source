@@ -1,0 +1,121 @@
+<html>
+<head>
+<link rel="shortcut icon" href="xp2.png" />
+<title>AmadeusSystem</title>
+<meta charset="UTF-8"/>
+</head>
+<body style="overflow:hidden;background:url('images/bg1.png') #333">
+<div id="bgtxt" style="position:absolute;top:0px;left:0px;width:100%;height:100%;padding:10px;color:rgba(200,200,200,0.25)">HELLO<br>WORLD</div>
+<div id="splash0" style="text-align:center;">
+<img id="splash" src="images/logo1.png" style="height:100%;">
+</div>
+<div id="kurisu0" style="display:none;text-align:center;"><img id="kurisu" src="images/kurisu_happy1.png" style="position:relative;top:7%;height:95%;"></div>
+<div id="loadstub">
+<script>
+var s="";//Единственная цель этого вкладыша -- вынуждение браузера сначала загрузить все пикчи, а затем уже показывать анимацию
+for(i=1;i<39;i++)document.write('<img src="images/logo'+i+'.png" style="height:1px;position:absolute;top:-10px;">');
+</script>
+</div>
+<script>
+mood="happy";
+servername="http://localhost:6205/"
+
+errlevel=0;
+scriptcount=0
+/*function updateState(){//Связывается с сервером и исполняет обновление. Warn: несекьюрно
+	script = document.createElement('script'); 
+	script.onerror=function(){
+		errlevel++;
+		if(errlevel>3){
+			clearInterval(mainlooptimer);
+			if(errlevel==3)alert("Потеряна связь с сервером!");
+		}
+	}
+	script.onload=function(){
+		errlevel=Math.max(0,errlevel-1)
+	}
+	script.src=servername;
+	if(scriptcount>20){
+		document.getElementsByTagName("head")[0].getElementsByTagName("script")[scriptcount%20]=script;
+		scriptcount++;
+	}else{
+		document.getElementsByTagName("head")[0].appendChild(script);
+		scriptcount++;
+	}
+}//*/
+xhttp=new XMLHttpRequest();
+xhttp.onreadystatechange=function(){
+	if(xhttp.readyState==4 && xhttp.status==200)eval(xhttp.responseText);
+}
+function updateState(){//Связывается с сервером и исполняет обновление. Warn: несекьюрно
+	xhttp.open("GET",servername+"?anticache="+Math.random(),true);//Антикеш
+	xhttp.send();
+}
+
+var mainlooptimer=0;
+splashnum=1;
+
+document.body.onload=function(){
+	splashtimer=setInterval(function(){
+		splashnum++;
+		document.getElementById("splash").src="images/logo"+Math.min(splashnum,39)+".png";
+//		document.getElementById("splash"+Math.min(splashnum,39)).style.display="block";
+//		setTimeout('document.getElementById("splash"+(Math.min(splashnum,39)-1)).style.display="none";',40);
+		if(splashnum==40){
+			clearInterval(splashtimer);
+			//Теперь можно запрашивать у сервера данные
+			mainlooptimer=setInterval(updateState,200);
+		}
+	},50);//Понтовая анимация-приветствие с надписью "Amadeus"
+};
+var isHideSplash=false;
+function hideSplash(){//Меняет надпись Amadeus на Курису
+	if(isHideSplash)return;
+	isHideSplash=true;
+	document.getElementById("splash0").style.display="none";
+	document.getElementById("kurisu0").style.display="block";
+}
+
+saytimer=0;
+saynum=0;
+endsaynum=0;
+function saying(t){
+	saynum=0;
+	endsaynum=t/80;
+	saytimer=setInterval(function(){
+		saynum++;
+		if(saynum>endsaynum){
+			clearInterval(saytimer);
+			document.getElementById("kurisu").src="images/kurisu_"+mood+"1.png";
+		}else document.getElementById("kurisu").src="images/kurisu_"+mood+Math.floor(Math.random()*2+1)+".png";
+	},80);
+}
+var isSaying=false;
+var saytimer2=0;
+function startSay(){
+	if(isSaying)return;
+	isSaying=true;
+	saytimer2=setInterval(function(){
+		document.getElementById("kurisu").src="images/kurisu_"+mood+Math.floor(Math.random()*2+1)+".png";
+	},80);
+}
+function stopSay(){
+	if(!isSaying)return;
+	isSaying=false;
+	clearInterval(saytimer2);
+	document.getElementById("kurisu").src="images/kurisu_"+mood+"1.png";
+}
+
+function setMood(m){
+	mood=m;
+	document.getElementById("kurisu").src="images/kurisu_"+mood+"1.png";
+}
+
+function setLogs(s){
+	document.getElementById("bgtxt").innerHTML=s[0]+"<br>";
+	for(i=1;i<s.length;i++)document.getElementById("bgtxt").innerHTML+=s[i]+"<br>";
+}
+
+</script>
+</body>
+</html>
